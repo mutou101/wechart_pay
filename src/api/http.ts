@@ -1,29 +1,30 @@
 
-import axios, { AxiosRequestConfig } from 'axios';
+import axios from 'axios';
 
 const instance = axios.create({
-  baseURL: '/api',
+  baseURL: 'http://175.24.128.73:50003', // 匹配代理路径
   timeout: 10000,
   headers: {
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/json',
+    'AppId': 7364117434221961217
   }
 });
 
-instance.interceptors.request.use((config) => {
+// 请求拦截器
+instance.interceptors.request.use(config => {
   const token = localStorage.getItem('token');
-  if (token && config.headers) {
+  if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
 });
 
+// 响应拦截器
 instance.interceptors.response.use(
   response => response.data,
   error => {
-    if (error.response) {
-      console.error('API Error:', error.response.status, error.response.data);
-    }
-    return Promise.reject(error.response?.data || error.message);
+    console.error('API Error:', error);
+    return Promise.reject(error);
   }
 );
 

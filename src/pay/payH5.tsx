@@ -74,7 +74,6 @@ const PayH5 =() =>{
       description: '微信扫码支付。',
       Notifyurl: 'https://www.douyin.com/?recommend=1',
     }
-    debugger;
     const result = await pay(params);
     console.log(result);
   };
