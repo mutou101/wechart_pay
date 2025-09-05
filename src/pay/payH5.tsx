@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { Button, Card, List, Modal, Toast } from 'antd-mobile';
+import React, { useEffect, useState } from 'react';
+import { Button, Card, List, Modal, Toast, Image as Img   } from 'antd-mobile';
 import { ChatAddOutline , AlipayCircleFill, CalendarOutline,  } from 'antd-mobile-icons';
-import { login, pay } from '../api/payApi';
+import { pay } from '../api/payApi';
 
 import './pay.css';
 
@@ -15,7 +15,7 @@ type Plan = {
 };
 
 const PayH5 =() =>{ 
-    const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
+  const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<string>('');
 
   const plans: Plan[] = [
@@ -65,17 +65,36 @@ const PayH5 =() =>{
     });
   };
 
+  const generateRandomTenDigitNumber = () => {
+    const min = 1; // 最小值（不包括）
+    const max = 1e12; // 最大值（不包括）
+    const number = Math.floor(Math.random() * (max - min) + min);
+    return number.toString().slice(-10); // 取最后10位数字作为结果
+}
+
   const handlePayment = async () => {
     const params = {
-      subject: '会员',
-      outTradeNo: 'GT88545121012',
-      total: 100,
-      payType: 101,
+      subject: 'dolor irure dolor eiusmod',
+      outTradeNo: generateRandomTenDigitNumber(),
+      total: 1,
+      payType: 104,
       description: '微信扫码支付。',
-      Notifyurl: 'https://www.douyin.com/?recommend=1',
+      notifyUrl: 'http://175.24.128.73:50003/wechatpay/v3/notify',
+      version: 'v3'
     }
     const result = await pay(params);
-    console.log(result);
+    
+    const blobUrl = URL.createObjectURL(result.data);
+    Modal.alert({
+      header: '',
+      title: '请扫码支付',
+      closeOnMaskClick: true,
+      content: (
+        <div>
+          <Img src={blobUrl} /> 
+        </div>
+      ),
+    })
   };
 
   return (
