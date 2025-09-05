@@ -91,7 +91,7 @@ const PayH5 =() =>{
       closeOnMaskClick: true,
       content: (
         <div>
-          <Img src={blobUrl} /> 
+          <Img src={blobUrl} width={300} height={300}/> 
         </div>
       ),
     })
