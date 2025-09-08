@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Card, List, Modal, Toast, Image as Img   } from 'antd-mobile';
 import { ChatAddOutline , AlipayCircleFill, CalendarOutline,  } from 'antd-mobile-icons';
-import { pay } from '../api/payApi';
+import { pay, fetchData } from '../api/payApi';
 
 import './pay.css';
 
@@ -82,6 +82,7 @@ const PayH5 =() =>{
       notifyUrl: 'http://175.24.128.73:50003/wechatpay/v3/notify',
       version: 'v3'
     }
+
     const result = await pay(params);
     
     const blobUrl = URL.createObjectURL(result.data);

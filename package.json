@@ -16,6 +16,8 @@
     "antd-mobile": "^5.39.0",
     "antd-mobile-icons": "^0.3.0",
     "axios": "^1.11.0",
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
     "http-proxy-middleware": "^3.0.5",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
@@ -48,6 +50,7 @@
     ]
   },
   "devDependencies": {
+    "@types/cors": "^2.8.19",
     "@typescript-eslint/eslint-plugin": "^8.42.0",
     "@typescript-eslint/parser": "^8.42.0",
     "eslint-plugin-react": "^7.37.5"
