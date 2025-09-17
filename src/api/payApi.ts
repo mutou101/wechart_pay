@@ -1,7 +1,11 @@
 import http from './http';
 
 export const pay = (params: {})=> {
-    return http.post('pay/test/QrCodePay', params, { responseType: 'blob' });
+    return http.post('unifiedorder', params, { responseType: 'blob' });
+}
+
+export const encrypt = (encryptionKey: string, params: {})=> {
+    return http.post(`test/sm4/gcm/encrypt?encryptionKey=${encryptionKey}`, params);
 }
 
 

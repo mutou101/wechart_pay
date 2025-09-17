@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Card, List, Modal, Toast, Image as Img   } from 'antd-mobile';
 import { ChatAddOutline , AlipayCircleFill, CalendarOutline,  } from 'antd-mobile-icons';
-import { pay, fetchData } from '../api/payApi';
+import { QRCodeSVG } from 'qrcode.react';
+import { pay, encrypt } from '../api/payApi';
 
 import './pay.css';
 
@@ -35,36 +36,6 @@ const PayH5 =() =>{
     },
   ];
 
-  const handlePayment1 = () => {
-    if (!selectedPlan) {
-      Toast.show('请选择会员套餐');
-      return;
-    }
-    if (!paymentMethod) {
-      Toast.show('请选择支付方式');
-      return;
-    }
-
-    Modal.confirm({
-      content: `确认支付 ¥${selectedPlan.price} 开通${selectedPlan.name}？`,
-      onConfirm: () => {
-        if (paymentMethod === 'wechat') {
-          const redirectUrl = encodeURIComponent(window.location.href + '?payment=success');
-          const mwebUrl = `https://wx.tenpay.com/cgi-bin/mmpayweb-bin/checkmweb?prepay_id=wx123456789&package=WAP&redirect_url=${redirectUrl}`;
-          
-          const isWechat = /MicroMessenger/i.test(navigator.userAgent);
-          if(isWechat) {
-            window.location.href = mwebUrl;
-          } else {
-            Toast.show('请在微信客户端内完成支付');
-          }
-        } else {
-          Toast.show('支付功能开发中');
-        }
-      },
-    });
-  };
-
   const generateRandomTenDigitNumber = () => {
     const min = 1; // 最小值（不包括）
     const max = 1e12; // 最大值（不包括）
@@ -80,19 +51,24 @@ const PayH5 =() =>{
       payType: 104,
       description: '微信扫码支付。',
       notifyUrl: 'http://175.24.128.73:50003/wechatpay/v3/notify',
-      version: 'v3'
+      version: 'v3',
     }
-
-    const result = await pay(params);
+    const encryptionKey = '3a1c639bbcdc9b35ad8c0a572c17db0a';
+    const encryptRes= await encrypt(encryptionKey, params);
+    encryptRes.data.appId = '7364117434221961217';
+    const result = await pay(encryptRes.data);
     
-    const blobUrl = URL.createObjectURL(result.data);
     Modal.alert({
       header: '',
       title: '请扫码支付',
       closeOnMaskClick: true,
       content: (
         <div>
-          <Img src={blobUrl} width={300} height={300}/> 
+          <QRCodeSVG 
+            value={result.data}
+            size={250}
+            level="H"
+          />
         </div>
       ),
     })
