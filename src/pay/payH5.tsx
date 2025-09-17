@@ -57,7 +57,6 @@ const PayH5 =() =>{
     const encryptRes= await encrypt(encryptionKey, params);
     encryptRes.data.appId = '7364117434221961217';
     const result = await pay(encryptRes.data);
-    
     Modal.alert({
       header: '',
       title: '请扫码支付',
@@ -65,9 +64,12 @@ const PayH5 =() =>{
       content: (
         <div>
           <QRCodeSVG 
-            value={result.data}
-            size={250}
-            level="H"
+            value={result.data.data}
+            size={260}
+            marginSize={5}
+            bgColor='#FFFFFF'
+            fgColor='#000000'
+            level='H'
           />
         </div>
       ),

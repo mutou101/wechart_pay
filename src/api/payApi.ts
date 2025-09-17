@@ -1,7 +1,7 @@
 import http from './http';
 
 export const pay = (params: {})=> {
-    return http.post('unifiedorder', params, { responseType: 'blob' });
+    return http.post('unifiedorder', params);
 }
 
 export const encrypt = (encryptionKey: string, params: {})=> {

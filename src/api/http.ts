@@ -5,7 +5,7 @@ import axios from 'axios';
 // http://175.24.128.73:50003/pay/
 const instance = axios.create({
   baseURL: window.location.hostname === 'localhost' 
-  ? 'https://localhost:44304/pay/'
+  ? 'http://175.24.128.73:50003/pay/'
   : '/api/proxy/', 
   timeout: 10000,
   headers: {
