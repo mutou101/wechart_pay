@@ -287,10 +287,9 @@ const PayH5 =() =>{
           <Form.Item
             name="channel"
             label="支付软件"
-            hidden
             initialValue={'WECHATPAYV3'}
           >
-            <Input placeholder="请输入" />
+            <Input placeholder="WECHATPAYV3/WECHATPAYV2/ALIPAY" />
         </Form.Item>
         </Form>
       </div>
@@ -352,7 +351,7 @@ const PayH5 =() =>{
         </Form>
       </div>
 
-            <div className="footer">
+      <div className="footer">
         <Form
           onFinish={handleClickFind}
           footer={
@@ -370,10 +369,9 @@ const PayH5 =() =>{
           <Form.Item
             name="channel"
             label="支付软件"
-            hidden
             initialValue={'WECHATPAYV3'}
           >
-            <Input placeholder="请输入" />
+            <Input placeholder="WECHATPAYV3/WECHATPAYV2/ALIPAY" />
         </Form.Item>
         </Form>
       </div>
