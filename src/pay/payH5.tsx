@@ -159,10 +159,10 @@ const PayH5 =() =>{
       Modal.alert({
         content: '订单关闭成功',
         showCloseButton: true,
-        onConfirm: () => {
-          console.log('Confirmed')
-        },
-      })
+      });
+      
+      const mes = JSON.parse(res.data.data);
+      console.log('订单关闭成功: ', mes);
     }
   }
 
@@ -175,10 +175,10 @@ const PayH5 =() =>{
       Modal.alert({
         content: '退款成功',
         showCloseButton: true,
-        onConfirm: () => {
-          console.log('Confirmed')
-        },
-      })
+      });
+      
+      const mes = JSON.parse(res.data.data);
+      console.log('退款成功: ', mes);
     }
   }
 
@@ -188,6 +188,14 @@ const PayH5 =() =>{
     encryptRes.data.appId = appId;
     const res = await find(encryptRes.data);
     
+    if(res.data.code === 'SUCCESS') {
+      Modal.alert({
+        title: '查询成功',
+        showCloseButton: true,
+      });
+      const mes = JSON.parse(res.data.data);
+      console.log('查询成功: ', mes);
+    }
   }
 
   return (
