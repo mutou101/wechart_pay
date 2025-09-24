@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Button, Card, List, Modal, Toast, Image as Img   } from 'antd-mobile';
 import { ChatAddOutline , AlipayCircleFill, CalendarOutline,  } from 'antd-mobile-icons';
 import { QRCodeSVG } from 'qrcode.react';
+import AlipayProcessor from '../alipay/alipayHandler';
 import { pay, encrypt } from '../api/payApi';
 
 import './pay.css';
@@ -18,19 +19,27 @@ type Plan = {
 const PayH5 =() =>{ 
   const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<string>('');
+  const [isWeChat, setIsWeChat] = useState(false);
+  const [formHtml, setFormHtml] = useState<string>('');
+
+    useEffect(() => {
+    // 检测微信环境
+    const ua = navigator.userAgent.toLowerCase();
+    setIsWeChat(ua.indexOf('micromessenger') !== -1);
+  }, []);
 
   const plans: Plan[] = [
     {
       id: 1,
       name: '月度会员',
-      price: 25,
+      price: 10,
       desc: '解锁高清画作下载权限',
     },
     {
       id: 2,
       name: '年度会员',
-      price: 228,
-      originalPrice: 285,
+      price: 96,
+      originalPrice: 120,
       desc: '享8折优惠+专属画作解析',
       recommended: true,
     },
@@ -41,23 +50,55 @@ const PayH5 =() =>{
     const max = 1e12; // 最大值（不包括）
     const number = Math.floor(Math.random() * (max - min) + min);
     return number.toString().slice(-10); // 取最后10位数字作为结果
-}
+  }
+  const appId = '7364117434221961217';
 
-  const handlePayment = async () => {
-    const params = {
-      subject: 'dolor irure dolor eiusmod',
-      outTradeNo: generateRandomTenDigitNumber(),
-      total: 1,
-      payType: 104,
-      description: '微信扫码支付。',
-      notifyUrl: 'http://175.24.128.73:50003/wechatpay/v3/notify',
-      version: 'v3',
+  const wechatOpenid = {
+    "WeChat": { "payer": { "openid": "oUpF8uMuAJO_M2pxb1Q9zNjWeS6o" }}
+  }
+
+  const alipayData = {
+    "Alipay": {
+      "product_code":"QUICK_WAP_WAY",
+      "return_url":"http://www.alipay.com"
     }
-    const encryptionKey = '3a1c639bbcdc9b35ad8c0a572c17db0a';
-    const encryptRes= await encrypt(encryptionKey, params);
-    encryptRes.data.appId = '7364117434221961217';
-    const result = await pay(encryptRes.data);
-    Modal.alert({
+  }
+
+  const defaultWechatParams = {
+    subject: '微信H5支付',
+    outTradeNo: generateRandomTenDigitNumber(),
+    total: 1,
+    payType: 104,
+    description: '微信H5支付,扫码支付',
+    notifyUrl: 'http://175.24.128.73:50003/wechatpay/v3/notify',
+    version: 'v3',
+  }
+
+  const defaultAlipayParams = {
+    subject: '支付宝支付',
+    outTradeNo: generateRandomTenDigitNumber(),
+    total: 1,
+    payType: 204,
+    description: '支付宝扫码支付',
+    notifyUrl: 'http://175.24.128.73:50003/wechatpay/v3/notify',
+    version: 'v1',
+    extensionData: JSON.stringify(alipayData)
+  }
+
+  const wechatPay = async (result: any) => {
+    if (!result) {
+      Toast.show('支付信息未准备好');
+      return;
+    }
+    if (isWeChat) {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (!urlParams.get('code')) {
+        const url = `https://open.weixin.qq.com/connect/oauth2/authorize?appid=${appId}&redirect_uri=${encodeURIComponent(window.location.href)}&response_type=code&scope=snsapi_base&state=STATE#wechat_redirect`;
+        window.location.href = url;
+      }
+      window.location.replace(result.data.data);
+    } else {
+      Modal.alert({
       header: '',
       title: '请扫码支付',
       closeOnMaskClick: true,
@@ -73,10 +114,44 @@ const PayH5 =() =>{
           />
         </div>
       ),
-    })
+      })
+    }
+  }
+
+  const alipay = (result: any) => {
+    const rawHtml = result.data.body;
+    setFormHtml(rawHtml);
+  }
+
+  const unionpay = ()=> {
+
+  }
+
+  const handlePayment2 = async () => {
+    if(paymentMethod === 'wechat'){
+      const result = await paymentFuc(defaultWechatParams);
+      return wechatPay(result);
+    }
+    if(paymentMethod === 'alipay'){
+      const result = await paymentFuc(defaultAlipayParams);
+      return alipay(result);
+    }
+    if(paymentMethod === 'unionpay'){
+      return unionpay();
+    }
+  }
+
+  const paymentFuc = async (params: {}) => {
+    const encryptionKey = '3a1c639bbcdc9b35ad8c0a572c17db0a';
+    const encryptRes= await encrypt(encryptionKey, params);
+    encryptRes.data.appId = appId;
+    const result = await pay(encryptRes.data);
+    return result;
   };
 
   return (
+    <div>
+    {formHtml ? <AlipayProcessor formHtml={formHtml} /> :
     <div className="pay">
       <Card className="header-card">
         <div className="header-content">
@@ -84,7 +159,6 @@ const PayH5 =() =>{
           <p>解锁莫奈艺术世界特权</p>
         </div>
       </Card>
-
       <Card title="选择会员套餐" className="plan-card">
         <List>
           {plans.map((plan) => (
@@ -99,9 +173,7 @@ const PayH5 =() =>{
                   )}
                 </div>
               }
-              className={`plan-item ${selectedPlan?.id === plan.id ? 'selected' : ''} ${
-                plan.recommended ? 'recommended' : ''
-              }`}
+              className={`plan-item ${selectedPlan?.id === plan.id ? 'selected' : ''}`}
             >
               <div className="plan-info">
                 <div className="plan-name">{plan.name}</div>
@@ -111,7 +183,6 @@ const PayH5 =() =>{
           ))}
         </List>
       </Card>
-
       <Card title="选择支付方式" className="payment-card">
         <div className="payment-methods">
           <div
@@ -137,19 +208,20 @@ const PayH5 =() =>{
           </div>
         </div>
       </Card>
-
       <div className="footer">
         <Button
           block
           color="primary"
           size="large"
-          onClick={handlePayment}
+          onClick={handlePayment2}
           disabled={!selectedPlan || !paymentMethod}
         >
           {selectedPlan ? `立即开通 ¥${selectedPlan.price}` : '选择套餐'}
         </Button>
         <p className="agreement">点击即表示同意《会员服务协议》</p>
       </div>
+    </div>
+    }
     </div>
   );
 }

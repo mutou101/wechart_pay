@@ -40,11 +40,6 @@
   background-color: #e6f7ff;
 }
 
-.plan-item.recommended {
-  border-color: #ff4d4f;
-  background-color: #fff1f0;
-}
-
 .price-column {
   display: flex;
   padding-top: 2px;
