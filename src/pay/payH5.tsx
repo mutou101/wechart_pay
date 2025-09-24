@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Card, List, Modal, Toast, Image as Img   } from 'antd-mobile';
+import { Button, Card, List, Modal, Toast, Image as Img, Form, Input   } from 'antd-mobile';
 import { ChatAddOutline , AlipayCircleFill, CalendarOutline,  } from 'antd-mobile-icons';
 import { QRCodeSVG } from 'qrcode.react';
 import AlipayProcessor from '../alipay/alipayHandler';
-import { pay, encrypt } from '../api/payApi';
+import { pay, encrypt, close, refund, find } from '../api/payApi';
 
 import './pay.css';
 
@@ -19,6 +19,7 @@ type Plan = {
 const PayH5 =() =>{ 
   const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<string>('');
+  const [closeFromData, setCloseFromData] = useState<Object>({});
   const [isWeChat, setIsWeChat] = useState(false);
   const [formHtml, setFormHtml] = useState<string>('');
 
@@ -149,6 +150,46 @@ const PayH5 =() =>{
     return result;
   };
 
+  const handleClickClose = async (values: any) => {
+    const encryptionKey = '3a1c639bbcdc9b35ad8c0a572c17db0a';
+    const encryptRes= await encrypt(encryptionKey, values);
+    encryptRes.data.appId = appId;
+    const res = await close(encryptRes.data);
+    if(res.data.code === 'SUCCESS') {
+      Modal.alert({
+        content: '订单关闭成功',
+        showCloseButton: true,
+        onConfirm: () => {
+          console.log('Confirmed')
+        },
+      })
+    }
+  }
+
+  const handleClickRefund = async (values: any) => {
+    const encryptionKey = '3a1c639bbcdc9b35ad8c0a572c17db0a';
+    const encryptRes= await encrypt(encryptionKey, values);
+    encryptRes.data.appId = appId;
+    const res = await refund(encryptRes.data);
+    if(res.data.code === 'SUCCESS') {
+      Modal.alert({
+        content: '退款成功',
+        showCloseButton: true,
+        onConfirm: () => {
+          console.log('Confirmed')
+        },
+      })
+    }
+  }
+
+  const handleClickFind = async(values: any) => {
+    const encryptionKey = '3a1c639bbcdc9b35ad8c0a572c17db0a';
+    const encryptRes= await encrypt(encryptionKey, values);
+    encryptRes.data.appId = appId;
+    const res = await find(encryptRes.data);
+    
+  }
+
   return (
     <div>
     {formHtml ? <AlipayProcessor formHtml={formHtml} /> :
@@ -219,6 +260,114 @@ const PayH5 =() =>{
           {selectedPlan ? `立即开通 ¥${selectedPlan.price}` : '选择套餐'}
         </Button>
         <p className="agreement">点击即表示同意《会员服务协议》</p>
+      </div>
+      <div className="footer">
+        <Form
+          onFinish={handleClickClose}
+          footer={
+            <Button block type='submit' color='primary' size='large'>
+              关闭订单
+            </Button>
+          }
+        >
+          <Form.Item
+            name="outTradeNo"
+            label="订单号"
+          >
+            <Input placeholder="请输入" />
+        </Form.Item>
+          <Form.Item
+            name="channel"
+            label="支付软件"
+            hidden
+            initialValue={'WECHATPAYV3'}
+          >
+            <Input placeholder="请输入" />
+        </Form.Item>
+        </Form>
+      </div>
+      
+      <div className="footer">
+        <Form
+          onFinish={handleClickRefund}
+          footer={
+            <Button block type='submit' color='primary' size='large'>
+              统一退款
+            </Button>
+          }
+        >
+          <Form.Item
+            name="outTradeNo"
+            label="业务订单号"
+          >
+            <Input placeholder="请输入" />
+          </Form.Item>
+          <Form.Item
+            name="transactionId"
+            label="交易订单号"
+          >
+            <Input placeholder="请输入" />
+          </Form.Item>
+          <Form.Item
+            name="outRefundNo"
+            label="退款单号"
+          >
+            <Input placeholder="请输入" />
+          </Form.Item>
+          <Form.Item
+            name="refundAmount"
+            label="退款金额"
+            initialValue={1}
+          >
+            <Input placeholder="请输入"  />
+          </Form.Item>
+          <Form.Item
+            name="totalAmount"
+            label="订单总金额"
+            initialValue={3}
+          >
+            <Input placeholder="请输入"  />
+          </Form.Item>
+          <Form.Item
+            name="channel"
+            label="支付软件"
+            initialValue={'WECHATPAYV3'}
+          >
+            <Input placeholder="WECHATPAYV3/WECHATPAYV2/ALIPAY" />
+          </Form.Item>
+          <Form.Item
+            name="reason"
+            label="退款原因"
+          >
+            <Input placeholder="请输入"  />
+          </Form.Item>
+        </Form>
+      </div>
+
+            <div className="footer">
+        <Form
+          onFinish={handleClickFind}
+          footer={
+            <Button block type='submit' color='primary' size='large'>
+              查看订单
+            </Button>
+          }
+        >
+          <Form.Item
+            name="outTradeNo"
+            label="订单号"
+          >
+            <Input placeholder="请输入" />
+        </Form.Item>
+          <Form.Item
+            name="channel"
+            label="支付软件"
+            hidden
+            initialValue={'WECHATPAYV3'}
+          >
+            <Input placeholder="请输入" />
+        </Form.Item>
+        </Form>
       </div>
     </div>
     }
