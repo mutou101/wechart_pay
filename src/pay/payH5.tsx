@@ -71,17 +71,17 @@ const PayH5 =() =>{
     total: 1,
     payType: 104,
     description: '微信H5支付,扫码支付',
-    notifyUrl: 'http://175.24.128.73:50003/wechatpay/v3/notify',
+    notifyUrl: 'http://175.24.128.73:50003/pay/test/notify/0',
     version: 'v3',
   }
 
   const defaultAlipayParams = {
     subject: '支付宝支付',
-    outTradeNo: generateRandomTenDigitNumber(),
+    outTradeNo: 'T2025091913520098',
     total: 1,
     payType: 204,
     description: '支付宝扫码支付',
-    notifyUrl: 'http://175.24.128.73:50003/wechatpay/v3/notify',
+    notifyUrl: 'http://175.24.128.73:50003/pay/test/notify/0',
     version: 'v1',
     extensionData: JSON.stringify(alipayData)
   }
@@ -155,14 +155,19 @@ const PayH5 =() =>{
     const encryptRes= await encrypt(encryptionKey, values);
     encryptRes.data.appId = appId;
     const res = await close(encryptRes.data);
+    const data = JSON.parse(res.data.data);
     if(res.data.code === 'SUCCESS') {
       Modal.alert({
-        content: '订单关闭成功',
+        title: '订单关闭成功',
+        content: data.code,
         showCloseButton: true,
       });
-      
-      const mes = JSON.parse(res.data.data);
-      console.log('订单关闭成功: ', mes);
+    }else{
+         Modal.alert({
+        title: '订单关闭失败',
+        content: data.code,
+        showCloseButton: true,
+      });
     }
   }
 
@@ -172,13 +177,8 @@ const PayH5 =() =>{
     encryptRes.data.appId = appId;
     const res = await refund(encryptRes.data);
     if(res.data.code === 'SUCCESS') {
-      Modal.alert({
-        content: '退款成功',
-        showCloseButton: true,
-      });
-      
-      const mes = JSON.parse(res.data.data);
-      console.log('退款成功: ', mes);
+      const rawHtml = res.data.body;
+      setFormHtml(rawHtml);
     }
   }
 
@@ -188,13 +188,20 @@ const PayH5 =() =>{
     encryptRes.data.appId = appId;
     const res = await find(encryptRes.data);
     
+    const data = JSON.parse(res.data.data);
+    console.log('响应结果', data);
     if(res.data.code === 'SUCCESS') {
       Modal.alert({
         title: '查询成功',
+        content: data.code,
         showCloseButton: true,
       });
-      const mes = JSON.parse(res.data.data);
-      console.log('查询成功: ', mes);
+    }else{
+         Modal.alert({
+        title: '查询失败',
+        content: data.code,
+        showCloseButton: true,
+      });
     }
   }
 
